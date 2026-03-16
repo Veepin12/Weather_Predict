@@ -2,6 +2,8 @@
 #include <string>
 #include <vector>
 #include <sstream>
+
+#include <mysqlx/xdevapi.h>
 using namespace std;
 
 class WeatherData {
@@ -100,13 +102,40 @@ public:
     }
 };
 
+vector<WeatherData> fetchWeatherDataFromDB()
+{
+    vector<WeatherData> data;
+
+    MySQL_Driver *driver;
+   Connection *con;
+    Statement *stmt;
+    ResultSet *res;
+
+    driver = get_mysql_driver_instance();
+
+    con = driver->connect("tcp://127.0.0.1:3306", "root", "virat");
+    con->setSchema("weatherdb");
+
+    stmt = con->createStatement();
+
+    res = stmt->executeQuery("SELECT minTemp, maxTemp FROM weather_data");
+
+    while (res->next())
+    {
+        int minT = res->getInt("minTemp");
+        int maxT = res->getInt("maxTemp");
+
+        data.push_back(WeatherData(minT, maxT));
+    }
+
+    delete res;
+    delete stmt;
+    delete con;
+
+    return data;
+}
 int main() {
-    vector<WeatherData> pastData = {
-        {22, 30},
-        {23, 31},
-        {24, 32},
-        {25, 33}
-    };
+   vector<WeatherData> pastData = fetchWeatherDataFromDB();
 
     WeatherData nextDayTemp =
         TemperatureModel::predictNextDay(pastData);
