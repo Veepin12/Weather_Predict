@@ -134,7 +134,7 @@ Merkle Root (Forecast Integrity): 734582934823
 
 ## Author
 
-Tej
+Veepin
 
 ---
 
